@@ -3,10 +3,14 @@
 import click
 import yaml
 import docker
+import os
+import pwd
+import getpass
+import sys
 from time import sleep
 
 
-def get_stream_definitions(config_file):
+def parse_config(config_file):
 
     """
     Get the stream info from config file
@@ -36,31 +40,43 @@ def tidy_up(ctx, param, value):
     ctx.exit()
 
 
-client = docker.from_env()
 
 @click.command()
 @click.argument('config', required=True)
-@click.option('--interface', required=False, default='eth0', help='The capture interfizzle fo shizzle (either ip or name)')
-@click.option('--tidyup', is_flag=True, is_eager=True, expose_value=False, callback=tidy_up)
-def run(config, interface):
+# @click.option('--tidyup', is_flag=True, is_eager=True, expose_value=False, callback=tidy_up)
+def run(config):
     """Run a bunch of tsduck tsp instances and log results"""
 
-    cfg = get_stream_definitions(config)
+    client = docker.from_env()
+    cfg = parse_config(config)
+    uid = int(pwd.getpwnam(getpass.getuser()).pw_uid)
+    print(uid)
+
+    try:
+        os.mkdir(cfg['logs'])
+    except FileExistsError:
+        print('Log dir already exists')
+    except OSError as e:
+        print(f'Log dir creation error : {e}')
 
     for stream in cfg['inputs']:
         print(f'Testing: {stream}')
         mc_ip = stream.split(':')[0]
         port = stream.split(':')[1]
-        cmd = f'bash -c "tsp -I ip {mc_ip}:{port} -P continuity -O drop > /tmp/{mc_ip}.log"'
+        # cmd = f'bash -c "tsp -I ip {mc_ip}:{port} -P continuity -O drop > {cfg["logs"]}/{mc_ip}.log"'
+        cmd = f'bash -c "while true; do sleep 1; echo thing; done > {cfg["logs"]}/{mc_ip}.log"'
         print(cmd)
         client.containers.run(
-                'tsduck:1',
+                cfg['image'],
                 detach=True,
                 command=cmd,
                 network_mode='host',
                 auto_remove=True,
                 name=mc_ip.replace('.', '-'),
-                tty=True)
+                tty=True,
+                volumes={cfg['logs']: {'bind': cfg['logs'], 'mode': 'rw'}},
+                user=uid
+                )
 
 
 if __name__ == '__main__':
