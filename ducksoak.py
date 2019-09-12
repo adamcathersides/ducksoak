@@ -40,7 +40,6 @@ def tidy_up(ctx, param, value):
     ctx.exit()
 
 
-
 @click.command()
 @click.argument('config', required=True)
 # @click.option('--tidyup', is_flag=True, is_eager=True, expose_value=False, callback=tidy_up)
