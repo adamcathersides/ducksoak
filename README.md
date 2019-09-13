@@ -11,7 +11,7 @@ pip install . --user
 
 # Configfile
 
-Its a yaml file.  You can define where you want the logs to go on your localmachine, the tsduck a image to use and what input and output stream you would like to analyse.
+Its a yaml file.  You can define where you want the logs to go on your localmachine, the tsduck a image to use and what input and output stream(s) you would like to analyse.
 Here is an example:
 ```
 image: tsduckimage:1
