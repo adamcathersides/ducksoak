@@ -1,6 +1,6 @@
 # ducksoak
 
-A way of running a load of tsduck docker instances for analyse a bunch of streams.
+A way of running a load of tsduck docker instances to analyse a bunch of streams.
 
 # Installation
 
