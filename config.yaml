@@ -1,11 +1,8 @@
 image: testimage:1
-
 logs: /tmp/soaklogs
-
 inputs:
     - 239.100.1.1:5000
     - 239.100.1.2:5000
-
 outputs:
     - 239.1.1.1:5000
     - 239.1.1.2:5000
