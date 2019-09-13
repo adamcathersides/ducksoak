@@ -32,8 +32,8 @@ def start_analysis_containers(client, stream_list, image, logs, uid):
         print(f'Testing: {stream}')
         mc_ip = stream.split(':')[0]
         port = stream.split(':')[1]
-        cmd = f'bash -c "tsp -I ip {mc_ip}:{port} -P continuity -O drop > {logs}/{mc_ip}.log"'
-        # cmd = f'bash -c "while true; do sleep 1; echo thing; done > {logs}/{mc_ip}.log"'
+        # cmd = f'bash -c "tsp -I ip {mc_ip}:{port} -P continuity -O drop > {logs}/{mc_ip}.log"'
+        cmd = f'bash -c "while true; do sleep 1; echo thing; done > {logs}/{mc_ip}.log"'
         client.containers.run(
                 image,
                 detach=True,
