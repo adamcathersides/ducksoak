@@ -27,7 +27,7 @@ outputs:
 # Running
 
 This script will run a tsduck container per input/output stream 
-### To make a mess..
+### To make a mess..(normal running)
 ```
 ducksoak config.yaml
 ```
