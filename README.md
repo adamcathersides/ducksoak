@@ -39,8 +39,14 @@ ducksoak config.yaml --tidyup
 
 # Docker usage
 This relies on being able to access the docker socket on the host
+Also be aware the permissions on the volumed in log directory may be a bit screwy (wip)
+
+```
+docker run --net=host -it -v /home/adam.cathersides/github/ducksoak/config.yaml:/config.yaml -v /tmp/soaklogs/:/tmp/soaklogs/ -v /var/run/docker.sock:/var/run/docker.sock adamcathersides/ducksoak:1 /config.yaml
 ```
 
+```
+docker run --net=host -it -v /home/adam.cathersides/github/ducksoak/config.yaml:/config.yaml -v /var/run/docker.sock:/var/run/docker.sock adamcathersides/ducksoak:1 /config.yaml --tidyup
 ```
 
 # Notes
