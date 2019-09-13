@@ -34,57 +34,50 @@ def start_analysis_containers(client, stream_list, image, logs, uid):
         port = stream.split(':')[1]
         # cmd = f'bash -c "tsp -I ip {mc_ip}:{port} -P continuity -O drop > {logs}/{mc_ip}.log"'
         cmd = f'bash -c "while true; do sleep 1; echo thing; done > {logs}/{mc_ip}.log"'
-        print(cmd)
         client.containers.run(
                 image,
                 detach=True,
                 command=cmd,
                 network_mode='host',
                 auto_remove=True,
-                name=mc_ip.replace('.', '-'),
+                name=mc_ip,
                 tty=True,
                 volumes={logs: {'bind': logs, 'mode': 'rw'}},
                 user=uid
                 )
 
 
-def tidy_up(ctx, param, value):
+def tidy_up(client, cfg):
 
-    if not value or ctx.resilient_parsing:
-        return
-    for stream in cfg['inputs']:
-        mc_ip = stream.split(':')[0]
-        port = stream.split(':')[1]
-        client.remove(name=mc_ip.replace('.', '-'))
-
-    for stream in cfg['outputs']:
-        mc_ip = stream.split(':')[0]
-        port = stream.split(':')[1]
-        client.remove(name=mc_ip.replace('.', '-'))
-    ctx.exit()
+    for c in client.containers.list():
+        if c.name in cfg['inputs'] or cfg['outputs']:
+            print(f'Killing : {c.name}')
+            c.kill()
 
 
 @click.command()
 @click.argument('config', required=True)
-# @click.option('--tidyup', is_flag=True, is_eager=True, expose_value=False, callback=tidy_up)
-def run(config):
+@click.option('--tidyup', is_flag=True)
+def run(config, tidyup):
     """Run a bunch of tsduck tsp instances and log results"""
 
     client = docker.from_env()
     cfg = parse_config(config)
     uid = int(pwd.getpwnam(getpass.getuser()).pw_uid)
-    print(uid)
 
     try:
         os.mkdir(cfg['logs'])
     except FileExistsError:
-        print('Log dir already exists')
+        pass
     except OSError as e:
         print(f'Log dir creation error : {e}')
         sys.exit(1)
 
-    start_analysis_containers(client, cfg['inputs'], cfg['image'], cfg['logs'], uid)
-    start_analysis_containers(client, cfg['outputs'], cfg['image'], cfg['logs'], uid)
+    if tidyup:
+        tidy_up(client, cfg)
+    else:
+        start_analysis_containers(client, cfg['inputs'], cfg['image'], cfg['logs'], uid)
+        start_analysis_containers(client, cfg['outputs'], cfg['image'], cfg['logs'], uid)
 
 if __name__ == '__main__':
     run()
