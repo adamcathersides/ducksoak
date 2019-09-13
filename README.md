@@ -37,5 +37,11 @@ ducksoak config.yaml
 ducksoak config.yaml --tidyup
 ```
 
+# Docker usage
+This relies on being able to access the docker socket on the host
+```
+
+```
+
 # Notes
 The tsduck containers are run in host networking mode

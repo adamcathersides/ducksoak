@@ -49,11 +49,12 @@ def start_analysis_containers(client, stream_list, image, logs, uid):
 
 def tidy_up(client, cfg):
 
+    inputs = [i.split(':')[0] for i in cfg['inputs']]
+    outputs = [o.split(':')[0] for o in cfg['outputs']]
     for c in client.containers.list():
-        if c.name in cfg['inputs'] or cfg['outputs']:
+        if (c.name in inputs) or (c.name in outputs):
             print(f'Killing : {c.name}')
             c.kill()
-
 
 @click.command()
 @click.argument('config', required=True)
@@ -65,17 +66,16 @@ def run(config, tidyup):
     cfg = parse_config(config)
     uid = int(pwd.getpwnam(getpass.getuser()).pw_uid)
 
-    try:
-        os.mkdir(cfg['logs'])
-    except FileExistsError:
-        pass
-    except OSError as e:
-        print(f'Log dir creation error : {e}')
-        sys.exit(1)
-
     if tidyup:
         tidy_up(client, cfg)
     else:
+        try:
+            os.mkdir(cfg['logs'])
+        except FileExistsError:
+            pass
+        except OSError as e:
+            print(f'Log dir creation error : {e}')
+            sys.exit(1)
         start_analysis_containers(client, cfg['inputs'], cfg['image'], cfg['logs'], uid)
         start_analysis_containers(client, cfg['outputs'], cfg['image'], cfg['logs'], uid)
 
